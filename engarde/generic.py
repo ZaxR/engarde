@@ -37,6 +37,7 @@ def verify(df, check, *args, **kwargs):
         raise
     return df
 
+
 def verify_all(df, check, *args, **kwargs):
     """
     Verify that all the entries in ``check(df, *args, **kwargs)``
@@ -50,6 +51,7 @@ def verify_all(df, check, *args, **kwargs):
         e.args = (msg, df[~result])
         raise
     return df
+
 
 def verify_any(df, check, *args, **kwargs):
     """
@@ -69,12 +71,13 @@ def verify_any(df, check, *args, **kwargs):
 # Error reporting
 # ---------------
 
+
 def bad_locations(df):
     columns = df.columns
     all_locs = chain.from_iterable(zip(df.index, cycle([col])) for col in columns)
-    bad = pd.Series(list(all_locs))[np.asarray(df).ravel(1)]
+    bad = pd.Series(list(all_locs))[np.asarray(df).ravel(order='F')]
     msg = bad.values
     return msg
 
-__all__ = ['verify', 'verify_all', 'verify_any', 'bad_locations']
 
+__all__ = ['verify', 'verify_all', 'verify_any', 'bad_locations']

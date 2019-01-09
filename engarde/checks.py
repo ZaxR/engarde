@@ -43,6 +43,7 @@ def none_missing(df, columns=None):
         raise
     return df
 
+
 def is_monotonic(df, items=None, increasing=None, strict=False):
     """
     Asserts that the DataFrame is monotonic.
@@ -83,6 +84,7 @@ def is_monotonic(df, items=None, increasing=None, strict=False):
         if not good:
             raise AssertionError
     return df
+
 
 def is_shape(df, shape):
     """
@@ -150,7 +152,7 @@ def unique_index(df):
     try:
         assert df.index.is_unique
     except AssertionError as e:
-        e.args = df.index.get_duplicates()
+        e.args = df.index[df.index.duplicated()].unique()
         raise
     return df
 
@@ -176,6 +178,7 @@ def within_set(df, items=None):
             raise AssertionError('Not in set', bad)
     return df
 
+
 def within_range(df, items=None):
     """
     Assert that a DataFrame is within a range.
@@ -196,6 +199,7 @@ def within_range(df, items=None):
             bad = (lower > df[k]) | (upper < df[k])
             raise AssertionError("Outside range", bad)
     return df
+
 
 def within_n_std(df, n=3):
     """
@@ -220,6 +224,7 @@ def within_n_std(df, n=3):
         raise AssertionError(msg)
     return df
 
+
 def has_dtypes(df, items):
     """
     Assert that a DataFrame has ``dtypes``
@@ -237,7 +242,7 @@ def has_dtypes(df, items):
     dtypes = df.dtypes
     for k, v in items.items():
         if not dtypes[k] == v:
-            raise AssertionError("{} has the wrong dtype. Should be ({}), is ({})".format(k, v,dtypes[k]))
+            raise AssertionError("{} has the wrong dtype. Should be ({}), is ({})".format(k, v, dtypes[k]))
     return df
 
 
@@ -298,4 +303,4 @@ def is_same_as(df, df_to_compare, **kwargs):
 __all__ = ['is_monotonic', 'is_same_as', 'is_shape', 'none_missing',
            'unique_index', 'within_n_std', 'within_range', 'within_set',
            'has_dtypes', 'verify', 'verify_all', 'verify_any',
-           'one_to_many','is_same_as',]
+           'one_to_many', 'is_same_as', ]
