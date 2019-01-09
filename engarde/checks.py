@@ -300,6 +300,20 @@ def is_same_as(df, df_to_compare, **kwargs):
     return df
 
 
+def multi_check(df, funcs_w_params, warn=False):
+    error_msgs = []
+    for func, params in funcs_w_params.items():
+        try:
+            func(**params)
+        except AssertionError as e:
+            error_msgs.append(e)
+
+    if warn:
+        print(error_msgs)
+        return df
+    raise AssertionError("\n".join(str(i) for i in error_msgs))
+
+
 __all__ = ['is_monotonic', 'is_same_as', 'is_shape', 'none_missing',
            'unique_index', 'within_n_std', 'within_range', 'within_set',
            'has_dtypes', 'verify', 'verify_all', 'verify_any',

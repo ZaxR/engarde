@@ -11,8 +11,10 @@ import engarde.decorators as dc
 def _add_n(df, n=1):
     return df + n
 
+
 def _noop(df):
     return df
+
 
 def test_none_missing():
     df = pd.DataFrame(np.random.randn(5, 3))
@@ -24,6 +26,7 @@ def test_none_missing():
     result = dc.none_missing()(_add_n)(df, n=2)
     tm.assert_frame_equal(result, df + 2)
 
+
 def test_none_missing_raises():
     df = pd.DataFrame(np.random.randn(5, 3))
     df.iloc[0, 0] = np.nan
@@ -32,6 +35,7 @@ def test_none_missing_raises():
 
     with pytest.raises(AssertionError):
         dc.none_missing()(_add_n)(df, n=2)
+
 
 def test_monotonic_increasing_lax():
     df = pd.DataFrame([1, 2, 2])
@@ -51,6 +55,7 @@ def test_monotonic_increasing_lax():
     with pytest.raises(AssertionError):
         dc.is_monotonic(increasing=True)(_add_n)(df)
 
+
 def test_monotonic_increasing_strict():
     df = pd.DataFrame([1, 2, 3])
     tm.assert_frame_equal(df, ck.is_monotonic(df, increasing=True, strict=True))
@@ -69,6 +74,7 @@ def test_monotonic_increasing_strict():
     with pytest.raises(AssertionError):
         dc.is_monotonic(increasing=True, strict=True)(_add_n)(df)
 
+
 def test_monotonic_decreasing():
     df = pd.DataFrame([2, 2, 1])
     tm.assert_frame_equal(df, ck.is_monotonic(df, increasing=False))
@@ -86,6 +92,7 @@ def test_monotonic_decreasing():
         ck.is_monotonic(df, increasing=False)
     with pytest.raises(AssertionError):
         dc.is_monotonic(increasing=False)(_add_n)(df)
+
 
 def test_monotonic_decreasing_strict():
     df = pd.DataFrame([3, 2, 1])
@@ -106,6 +113,7 @@ def test_monotonic_decreasing_strict():
     with pytest.raises(AssertionError):
         dc.is_monotonic(increasing=False, strict=True)(_add_n)(df)
 
+
 def test_monotonic_either():
     df = pd.DataFrame({'A': [1, 2, 2], 'B': [3, 2, 2]})
     tm.assert_frame_equal(df, ck.is_monotonic(df))
@@ -117,6 +125,7 @@ def test_monotonic_either():
         ck.is_monotonic(df)
     with pytest.raises(AssertionError):
         dc.is_monotonic()(_add_n)(df)
+
 
 def test_monotonic_either_stict():
     df = pd.DataFrame({'A': [1, 2, 3], 'B': [3, 2, 1]})
@@ -130,11 +139,13 @@ def test_monotonic_either_stict():
     with pytest.raises(AssertionError):
         dc.is_monotonic(strict=True)(_add_n)(df)
 
+
 def test_monotonic_items():
     df = pd.DataFrame({'A': [1, 2, 3], 'B': [3, 2, 3]})
     tm.assert_frame_equal(df, ck.is_monotonic(df, items={'A': (True, True)}))
     tm.assert_frame_equal(dc.is_monotonic(items={'A': (True, True)}, strict=True)(_add_n)(
         df), df + 1)
+
 
 def test_is_shape():
     shape = 10, 2
@@ -180,6 +191,7 @@ def test_unique_index():
     with pytest.raises(AssertionError):
         dc.unique_index()(_add_n)(df.reindex(['a', 'a', 'b']))
 
+
 def test_within_set():
     df = pd.DataFrame({'A': [1, 2, 3], 'B': ['a', 'b', 'c']})
     items = {'A': [1, 2, 3], 'B': ['a', 'b', 'c']}
@@ -196,6 +208,7 @@ def test_within_set():
     with pytest.raises(AssertionError):
         dc.within_set(items=items)(_noop)(df)
 
+
 def test_within_range():
     df = pd.DataFrame({'A': [-1, 0, 1]})
     items = {'A': (-1, 1)}
@@ -208,8 +221,9 @@ def test_within_range():
     with pytest.raises(AssertionError):
         dc.within_range(items)(_noop)(df)
 
+
 def test_within_n_std():
-    df = pd.DataFrame({'A': np.arange(10), 'B': list('abcde')*2})
+    df = pd.DataFrame({'A': np.arange(10), 'B': list('abcde') * 2})
     tm.assert_frame_equal(df, ck.within_n_std(df))
     tm.assert_frame_equal(df, dc.within_n_std()(_noop)(df))
 
@@ -217,6 +231,7 @@ def test_within_n_std():
         ck.within_n_std(df, .5)
     with pytest.raises(AssertionError):
         dc.within_n_std(.5)(_noop)(df)
+
 
 def test_has_dtypes():
     df = pd.DataFrame({'A': np.random.randint(0, 10, 10),
@@ -233,6 +248,7 @@ def test_has_dtypes():
     with pytest.raises(AssertionError):
         dc.has_dtypes(items={'A': bool})(_noop)(df)
 
+
 def test_one_to_many():
     df = pd.DataFrame({
         'parameter': ['Cu', 'Cu', 'Pb', 'Pb'],
@@ -241,6 +257,7 @@ def test_one_to_many():
     })
     result = ck.one_to_many(df, 'units', 'parameter')
     tm.assert_frame_equal(df, result)
+
 
 def test_one_to_many_raises():
     df = pd.DataFrame({
@@ -251,8 +268,9 @@ def test_one_to_many_raises():
     with pytest.raises(AssertionError):
         ck.one_to_many(df, 'units', 'parameter')
 
+
 def test_verify():
-    f = lambda x, n: len(x) > n
+    def f(x, n): return len(x) > n
     df = pd.DataFrame({'A': [1, 2, 3]})
     tm.assert_frame_equal(df, ck.verify(df, f, n=2))
     tm.assert_frame_equal(df, ck.verify(df, f, 2))
@@ -265,8 +283,9 @@ def test_verify():
         ck.verify(df, f, n=4)
         dc.verify(f, n=4)(_noop)(df)
 
+
 def test_verify_all():
-    f = lambda x, n: x > n
+    def f(x, n): return x > n
     df = pd.DataFrame({'A': [1, 2, 3]})
     tm.assert_frame_equal(df, ck.verify_all(df, f, 0))
     tm.assert_frame_equal(df, ck.verify_all(df, f, n=0))
@@ -275,8 +294,9 @@ def test_verify_all():
         ck.verify_all(df, f, n=2)
         dc.verify_all(f, n=2)(df)
 
+
 def test_verify_any():
-    f = lambda x, n: x > n
+    def f(x, n): return x > n
     df = pd.DataFrame({'A': [1, 2, 3]})
     tm.assert_frame_equal(df, ck.verify_any(df, f, 2))
     tm.assert_frame_equal(df, ck.verify_any(df, f, n=2))
@@ -284,6 +304,7 @@ def test_verify_any():
     with pytest.raises(AssertionError):
         ck.verify_any(df, f, n=4)
         dc.verify_any(f, n=4)(df)
+
 
 def test_is_same_as():
     df = pd.DataFrame({'A': [1, 2, 3], 'B': [1, 2, 3]})
@@ -299,6 +320,7 @@ def test_is_same_as():
     with pytest.raises(AssertionError):
         ck.is_same_as(df, df_not_equal)
         dc.is_same_as(df_not_equal)(_noop)(df)
+
 
 def test_is_same_as_with_kwargs():
     df = pd.DataFrame({'A': [1, 2, 3], 'B': [1, 2, 3]})
@@ -320,3 +342,13 @@ def test_is_same_as_with_kwargs():
 
     result = dc.is_same_as(df_equal_float, check_dtype=False)(_noop)(df)
     tm.assert_frame_equal(df, result)
+
+
+def test_multi_check():
+    df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+    result = ck.multi_check(df,
+                            funcs_w_params={ck.none_missing: {"df": df, "columns": None},
+                                            ck.is_shape: {"df": df, "shape": (3, 2)}},
+                            warn=False)
+    tm.assert_frame_equal(df, result)
+    # with pytest.raises(AssertionError):

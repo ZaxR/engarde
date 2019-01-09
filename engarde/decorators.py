@@ -5,6 +5,7 @@ from functools import wraps
 
 import engarde.checks as ck
 
+
 def none_missing(columns=None):
     """Asserts that no missing values (NaN) are found"""
     def decorate(func):
@@ -52,6 +53,7 @@ def unique_index():
         return wrapper
     return decorate
 
+
 def is_monotonic(items=None, increasing=None, strict=False):
     def decorate(func):
         @wraps(func)
@@ -62,6 +64,7 @@ def is_monotonic(items=None, increasing=None, strict=False):
             return result
         return wrapper
     return decorate
+
 
 def within_set(items):
     """
@@ -116,6 +119,7 @@ def within_n_std(n=3):
         return wrapper
     return decorate
 
+
 def has_dtypes(items):
     """
     Tests that the dtypes are as specified in items.
@@ -150,17 +154,20 @@ def verify(func, *args, **kwargs):
     """
     return _verify(func, None, *args, **kwargs)
 
+
 def verify_all(func, *args, **kwargs):
     """
     Assert that all of `func(*args, **kwargs)` are true.
     """
     return _verify(func, 'all', *args, **kwargs)
 
+
 def verify_any(func, *args, **kwargs):
     """
     Assert that any of `func(*args, **kwargs)` are true.
     """
     return _verify(func, 'any', *args, **kwargs)
+
 
 def _verify(func, _kind, *args, **kwargs):
     d = {None: ck.verify, 'all': ck.verify_all, 'any': ck.verify_any}
@@ -187,8 +194,18 @@ def is_same_as(df_to_compare, **assert_kwargs):
     return decorate
 
 
+def multi_check(checks, warn):
+    def decorate(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            ck.multi_check(result, checks, warn)
+            return result
+        return wrapper
+    return decorate
+
+
 __all__ = ['is_monotonic', 'is_same_as', 'is_shape', 'none_missing',
            'unique_index', 'within_range', 'within_set', 'has_dtypes',
            'verify', 'verify_all', 'verify_any', 'within_n_std',
-           'one_to_many','is_same_as',]
-
+           'one_to_many', 'is_same_as', 'multi_check']
