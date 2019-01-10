@@ -13,8 +13,7 @@ import pandas as pd
 import pandas.util.testing as tm
 import six
 
-from engarde import generic
-from engarde.generic import verify, verify_all, verify_any
+from engarde.generic import bad_locations, verify, verify_all, verify_any
 
 
 def none_missing(df, columns=None):
@@ -38,7 +37,7 @@ def none_missing(df, columns=None):
         assert not df[columns].isnull().any().any()
     except AssertionError as e:
         missing = df[columns].isnull()
-        msg = generic.bad_locations(missing)
+        msg = bad_locations(missing)
         e.args = msg
         raise
     return df
@@ -220,7 +219,7 @@ def within_n_std(df, n=3):
     stds = df.std()
     inliers = (np.abs(df[means.index] - means) < n * stds)
     if not np.all(inliers):
-        msg = generic.bad_locations(~inliers)
+        msg = bad_locations(~inliers)
         raise AssertionError(msg)
     return df
 
