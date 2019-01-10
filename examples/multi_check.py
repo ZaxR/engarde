@@ -19,8 +19,8 @@ def add_to_df(df, add_amt=5):
     return df
 
 
-add_to_df(df)
+df = add_to_df(df)
 print(df)
 
-add_to_df(df2)
+df2 = add_to_df(df2)
 print(df2)
