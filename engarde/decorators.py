@@ -15,7 +15,11 @@ class BaseDecorator(object):
                     "IsMonotonic": ck.is_monotonic,
                     "WithinSet": ck.within_set,
                     "WithinRange": ck.within_range,
-                    }
+                    "WithinNStd": ck.within_n_std,
+                    "HasDtypes": ck.has_dtypes,
+                    "OneToMany": one_to_many,
+                    "IsSameAs": is_same_as,
+                    "MultiCheck": multi_check}
 
     def __init__(self, enabled=True, **kwargs):
         self.enabled = enabled  # setter to enforce bool would be a lot safer, but challenge w/ decorator
@@ -28,8 +32,12 @@ class BaseDecorator(object):
             df = f(*args, **kwargs)
             if self.enabled:
                 check_func = self.CLS_FUNC_MAP[self.__class__.__name__]
-                params = inspect.getfullargspec(check_func).args[1:]  # is_shape_func
-                # does not currently warn you if you fed in EXTRA parameters not accepted by check_func
+                params = inspect.getfullargspec(check_func).args[1:]
+                # Error if parameters fed to decorator that are not accepted by check_func
+                unacceptable_kwargs = [k for k in self.__dict__ if k not in (params + ["enabled"])]
+                if any(unacceptable_kwargs):
+                    print(f"The following passed kwargs are not accepted by {check_func.__name__}: "
+                          f"{', '.join(unacceptable_kwargs)}. Ignoring these kwargs and continuing.")
                 kwargs = {param: getattr(self, param) for param in params if hasattr(self, param)}
                 check_func(df, **kwargs)
             return df
@@ -41,14 +49,10 @@ class IsShape(BaseDecorator):
 
 
 class NoneMissing(BaseDecorator):
-    # how to pass in columns=None as default..?
-    # add it to kwargs somehow..?
     pass
 
 
 class Unique(BaseDecorator):
-    # how to pass in columns=None as default..?
-    # add it to kwargs somehow..?
     pass
 
 
@@ -57,9 +61,6 @@ class UniqueIndex(BaseDecorator):
 
 
 class IsMonotonic(BaseDecorator):
-    # how to pass in defaults..?
-    # add it to kwargs somehow..?
-    # items=None, increasing=None, strict=False
     pass
 
 
@@ -72,9 +73,6 @@ class WithinRange(BaseDecorator):
 
 
 class WithinNStd(BaseDecorator):
-    # how to pass in defaults..?
-    # add it to kwargs somehow..?
-    # n=3
     pass
 
 
@@ -133,3 +131,25 @@ __all__ = ['is_monotonic', 'is_same_as', 'is_shape', 'none_missing',
            'unique_index', 'within_range', 'within_set', 'has_dtypes',
            'verify', 'verify_all', 'verify_any', 'within_n_std',
            'one_to_many', 'is_same_as', 'multi_check']
+
+
+if __name__ == '__main__':
+    df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+
+    # cheese is a kwarg not accepted by the check function. It's ignored.
+    @IsShape(enabled=True, shape=(4, 2), cheese=True)
+    def example1(df):
+        return df.add(5)
+
+    example1(df)  # errors
+
+    # # cheese is a kwarg not accepted by the check function. It's ignored.
+    # @IsShape(enabled=False, shape=(4, 2), cheese=True)
+    # def example1(df):
+    #     return df.add(5)
+
+    @NoneMissing(columns=["a"])
+    def example1(df):
+        return df.add(5)
+
+    example1(df)  # does not error b/c we disabled out decorator
