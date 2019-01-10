@@ -1,151 +1,97 @@
 # -*- coding: utf-8 -*-
 from __future__ import (unicode_literals, absolute_import, division)
 
-from functools import wraps
+import functools
+import inspect
 
 import engarde.checks as ck
 
 
-def none_missing(columns=None):
-    """Asserts that no missing values (NaN) are found"""
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.none_missing(result, columns=columns)
-            return result
-        return wrapper
-    return decorate
+class BaseDecorator(object):
+    CLS_FUNC_MAP = {"IsShape": ck.is_shape,
+                    "NoneMissing": ck.none_missing,
+                    "Unique": ck.unique,
+                    "UniqueIndex": ck.unique_index,
+                    "IsMonotonic": ck.is_monotonic,
+                    "WithinSet": ck.within_set,
+                    "WithinRange": ck.within_range,
+                    }
 
+    def __init__(self, enabled=True, **kwargs):
+        self.enabled = enabled  # setter to enforce bool would be a lot safer, but challenge w/ decorator
+        # self.warn = False ? No - put at func level for all funcs and pass through
+        self.__dict__.update(kwargs)
 
-def is_shape(shape):
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.is_shape(result, shape)
-            return result
-        return wrapper
-    return decorate
-
-
-def unique(columns=None):
-    """
-    Asserts that columns in the DataFrame only have unique values.
-    """
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.unique(result, columns=columns)
-            return result
-        return wrapper
-    return decorate
-
-
-def unique_index():
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.unique_index(result)
-            return result
-        return wrapper
-    return decorate
-
-
-def is_monotonic(items=None, increasing=None, strict=False):
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.is_monotonic(result, items=items, increasing=increasing,
-                            strict=strict)
-            return result
-        return wrapper
-    return decorate
-
-
-def within_set(items):
-    """
-    Check that DataFrame values are within set.
-
-    >>> @within_set({'A': {1, 3}})
-    >>> def f(df):
+    def __call__(self, f):
+        @functools.wraps(f)
+        def decorated(*args, **kwargs):
+            df = f(*args, **kwargs)
+            if self.enabled:
+                check_func = self.CLS_FUNC_MAP[self.__class__.__name__]
+                params = inspect.getfullargspec(check_func).args[1:]  # is_shape_func
+                # does not currently warn you if you fed in EXTRA parameters not accepted by check_func
+                kwargs = {param: getattr(self, param) for param in params if hasattr(self, param)}
+                check_func(df, **kwargs)
             return df
-    """
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.within_set(result, items)
-            return result
-        return wrapper
-    return decorate
+        return decorated
 
 
-def within_range(items):
-    """
-    Check that a DataFrame's values are within a range.
-
-    Parameters
-    ==========
-    items : dict or array-like
-        dict maps columss to (lower, upper)
-        array-like checks the same (lower, upper) for each column
-
-    """
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.within_range(result, items)
-            return result
-        return wrapper
-    return decorate
+class IsShape(BaseDecorator):
+    pass
 
 
-def within_n_std(n=3):
-    """
-    Tests that all values are within 3 standard deviations
-    of their mean.
-    """
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.within_n_std(result, n=n)
-            return result
-        return wrapper
-    return decorate
+class NoneMissing(BaseDecorator):
+    # how to pass in columns=None as default..?
+    # add it to kwargs somehow..?
+    pass
 
 
-def has_dtypes(items):
-    """
-    Tests that the dtypes are as specified in items.
-    """
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.has_dtypes(result, items)
-            return result
-        return wrapper
-    return decorate
+class Unique(BaseDecorator):
+    # how to pass in columns=None as default..?
+    # add it to kwargs somehow..?
+    pass
 
 
-def one_to_many(unitcol, manycol):
-    """ Tests that each value in ``manycol`` only is associated with
-    just a single value in ``unitcol``.
-    """
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.one_to_many(result, unitcol, manycol)
-            return result
-        return wrapper
-    return decorate
+class UniqueIndex(BaseDecorator):
+    pass
+
+
+class IsMonotonic(BaseDecorator):
+    # how to pass in defaults..?
+    # add it to kwargs somehow..?
+    # items=None, increasing=None, strict=False
+    pass
+
+
+class WithinSet(BaseDecorator):
+    pass
+
+
+class WithinRange(BaseDecorator):
+    pass
+
+
+class WithinNStd(BaseDecorator):
+    # how to pass in defaults..?
+    # add it to kwargs somehow..?
+    # n=3
+    pass
+
+
+class HasDtypes(BaseDecorator):
+    pass
+
+
+class OneToMany(BaseDecorator):
+    pass
+
+
+class IsSameAs(BaseDecorator):
+    pass
+
+
+class MultiCheck(BaseDecorator):
+    pass
 
 
 def verify(func, *args, **kwargs):
@@ -178,28 +124,6 @@ def _verify(func, _kind, *args, **kwargs):
         def wrapper(*operation_args, **operation_kwargs):
             result = operation_func(*operation_args, **operation_kwargs)
             vfunc(result, func, *args, **kwargs)
-            return result
-        return wrapper
-    return decorate
-
-
-def is_same_as(df_to_compare, **assert_kwargs):
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.is_same_as(result, df_to_compare, **assert_kwargs)
-            return result
-        return wrapper
-    return decorate
-
-
-def multi_check(checks, warn):
-    def decorate(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            ck.multi_check(result, checks, warn)
             return result
         return wrapper
     return decorate

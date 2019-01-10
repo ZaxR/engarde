@@ -90,4 +90,11 @@ Roadmap
 - Improve error message outputs
 	- Possibly JSON format
 - Add param for debug vs prod mode
-- Add functions for: has_infs, has_neg_infs, has_col_order, has_cols, etc.
+- Add functions for:
+  - has_infs,
+  - has_neg_infs,
+  - has_col_order,
+  - has_cols,
+  - Add check for object type columns that all values are of a python type (e.g. all str),
+  - Check incrementing/complete index
+- Demo how to use with read files from csv; write func to import, decorate with dc.funcs
