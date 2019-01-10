@@ -8,6 +8,7 @@ import engarde.checks as ck
 
 
 class BaseDecorator(object):
+    # todo: metaclass registration
     CLS_FUNC_MAP = {"IsShape": ck.is_shape,
                     "NoneMissing": ck.none_missing,
                     "Unique": ck.unique,
