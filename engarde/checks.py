@@ -304,7 +304,7 @@ def multi_check(df, checks, warn=False):
     error_msgs = []
     for func, params in checks.items():
         try:
-            func(**params)
+            func(df, **params)
         except AssertionError as e:
             error_msgs.append(e)
 
