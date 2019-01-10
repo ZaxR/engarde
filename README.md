@@ -69,3 +69,11 @@ See Also
 
 - [assertr](https://github.com/tonyfischetti/assertr)
 - [Validada](https://github.com/jnmclarty/validada)
+
+Roadmap
+=======
+
+- Improve error message outputs
+	- Possibly JSON format
+- Add param for debug vs prod mode
+- Add functions for: has_infs, has_neg_infs, has_col_order, has_cols, etc.
