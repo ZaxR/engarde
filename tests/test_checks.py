@@ -350,7 +350,7 @@ def test_is_same_as_with_kwargs():
     result = ck.is_same_as(df, df_equal_float, check_dtype=False)
     tm.assert_frame_equal(df, result)
 
-    result = dc.IsSameAs(df_equal_float, check_dtype=False)(_noop)(df)
+    result = dc.IsSameAs(df_equal_float, check_dtype=False)(_noop)(df)  # todo see why this fails
     tm.assert_frame_equal(df, result)
 
 
