@@ -22,40 +22,28 @@ class BaseDecorator(object):
                     "IsSameAs": ck.is_same_as,
                     "MultiCheck": ck.multi_check}
 
-    def __init__(self, **kwargs):  # how to take args in decorator..?
-        print("In __init__()")
-        print(kwargs)
+    def __init__(self, *args, **kwargs):  # how to take args in decorator..?
         self.enabled = True  # setter to enforce bool would be a lot safer, but challenge w/ decorator
         # self.warn = False ? No - put at func level for all funcs and pass through
-        self.__dict__.update(kwargs)
+        # unpack args here; zip with check_func params
         self.check_func = self.CLS_FUNC_MAP[self.__class__.__name__]
+        self.params = inspect.getfullargspec(self.check_func).args[1:]
 
-        # move check func params here? Unpack args accordingly?
-        # params = inspect.getfullargspec(self.check_func).args[1:]
-        # use attrs to unpack params list into self.attrs
+        self.__dict__.update(dict(zip(self.params, args)))
+
+        unacceptable_kwargs = [k for k in self.__dict__ if k not in (self.params + ["enabled", "check_func"])]
+        if any(unacceptable_kwargs):
+            print(f"The following passed kwargs are not accepted by {self.check_func.__name__}: "
+                  f"{', '.join(unacceptable_kwargs)}. Ignoring these kwargs and continuing.")
+
+        self.__dict__.update(kwargs)
 
     def __call__(self, f):
-        print("In __call_()")
-        print(f)
-
         @functools.wraps(f)
         def decorated(*args, **kwargs):
-            print("In decorated")
-            print("Args: ", args)
-            print("Kwargs: ", kwargs)
-            print("self.__dict__: ", self.__dict__)
             df = f(*args, **kwargs)
             if self.enabled:
-                params = inspect.getfullargspec(self.check_func).args[1:]
-                # Warns if parameters fed to decorator that are not accepted by check_func
-                unacceptable_kwargs = [k for k in self.__dict__ if k not in (params + ["enabled"])]
-                if any(unacceptable_kwargs):
-                    print(f"The following passed kwargs are not accepted by {self.check_func.__name__}: "
-                          f"{', '.join(unacceptable_kwargs)}. Ignoring these kwargs and continuing.")
-                kwargs = {param: getattr(self, param) for param in params if hasattr(self, param)}
-                print("Args: ", args)
-                print("Kwargs: ", kwargs)
-                print("self.__dict__: ", self.__dict__)
+                kwargs = {param: getattr(self, param) for param in self.params if hasattr(self, param)}
                 self.check_func(df, **kwargs)
             return df
         return decorated
@@ -135,7 +123,7 @@ def _verify(func, _kind, *args, **kwargs):
     vfunc = d[_kind]
 
     def decorate(operation_func):
-        @wraps(operation_func)
+        @functools.wraps(operation_func)
         def wrapper(*operation_args, **operation_kwargs):
             result = operation_func(*operation_args, **operation_kwargs)
             vfunc(result, func, *args, **kwargs)
@@ -160,7 +148,7 @@ if __name__ == '__main__':
 
     example1(df)  # errors
 
-    @IsShape(shape=(4, 2))
+    @IsShape((4, 2))
     def example1(df, n):
         return df.add(n)
 

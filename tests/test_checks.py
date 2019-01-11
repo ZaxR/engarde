@@ -37,7 +37,7 @@ def test_is_shape():
         tm.assert_frame_equal(result, df + 3)
 
         result = dc.IsShape(shp, enabled=False)(_add_n)(df, 4)  # enabled test
-        tm.assert_frame_equal(result, df + 5)
+        tm.assert_frame_equal(result, df + 4)
 
     with pytest.raises(AssertionError):
         ck.is_shape(df, (9, 2))
