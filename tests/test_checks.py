@@ -27,13 +27,23 @@ def test_is_shape():
     for shp in shapes:
         tm.assert_frame_equal(df, ck.is_shape(df, shp))
     for shp in shapes:
-        result = dc.IsShape(shape=shp)(_add_n)(df)
-        tm.assert_frame_equal(result, df + 1)
+        result = dc.IsShape(shape=shp)(_add_n)(df, 2)
+        tm.assert_frame_equal(result, df + 2)
+
+        result = dc.IsShape(shape=shp)(_noop)(df)
+        tm.assert_frame_equal(result, df)
+
+        result = dc.IsShape(shp)(_add_n)(df, 3)  # *arg test
+        tm.assert_frame_equal(result, df + 3)
+
+        result = dc.IsShape(shp, enabled=False)(_add_n)(df, 4)  # enabled test
+        tm.assert_frame_equal(result, df + 5)
 
     with pytest.raises(AssertionError):
         ck.is_shape(df, (9, 2))
     with pytest.raises(AssertionError):
-        dc.IsShape((9, 2))(_add_n)(df)
+        dc.IsShape(shape=(9, 2), cheese=True)(_add_n)(df)  # bad dc param check
+        dc.IsShape((9, 2))(_add_n)(df)  # check test
 
 
 def test_none_missing():
