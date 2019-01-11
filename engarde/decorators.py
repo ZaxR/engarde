@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import (unicode_literals, absolute_import, division)
-
 import functools
 import inspect
 
@@ -8,35 +6,22 @@ import engarde.checks as ck
 
 
 class BaseDecorator(object):
-    # todo: metaclass registration
-    CLS_FUNC_MAP = {"IsShape": ck.is_shape,
-                    "NoneMissing": ck.none_missing,
-                    "Unique": ck.unique,
-                    "UniqueIndex": ck.unique_index,
-                    "IsMonotonic": ck.is_monotonic,
-                    "WithinSet": ck.within_set,
-                    "WithinRange": ck.within_range,
-                    "WithinNStd": ck.within_n_std,
-                    "HasDtypes": ck.has_dtypes,
-                    "OneToMany": ck.one_to_many,
-                    "IsSameAs": ck.is_same_as,
-                    "MultiCheck": ck.multi_check}
-
     def __init__(self, *args, **kwargs):  # how to take args in decorator..?
         self.enabled = True  # setter to enforce bool would be a lot safer, but challenge w/ decorator
         # self.warn = False ? No - put at func level for all funcs and pass through
-        # unpack args here; zip with check_func params
-        self.check_func = self.CLS_FUNC_MAP[self.__class__.__name__]
         self.params = inspect.getfullargspec(self.check_func).args[1:]
 
         self.__dict__.update(dict(zip(self.params, args)))
-
-        unacceptable_kwargs = [k for k in self.__dict__ if k not in (self.params + ["enabled", "check_func"])]
-        if any(unacceptable_kwargs):
-            print(f"The following passed kwargs are not accepted by {self.check_func.__name__}: "
-                  f"{', '.join(unacceptable_kwargs)}. Ignoring these kwargs and continuing.")
-
         self.__dict__.update(kwargs)
+
+        relev_dict = {k: v for k, v in self.__dict__.items() if k not in ["check_func", "enabled", "params"]}
+        bad_kwargs = [k for k in relev_dict if k not in self.params]
+        if any(bad_kwargs):
+            msg = ("got unexpected keyword arguments:"
+                   if len(bad_kwargs) > 1
+                   else "got an unexpected keyword argument")
+            bad_kwarg_str = ', '.join(bad_kwargs)
+            raise TypeError(f"{self.__class__.__name__} {msg} '{bad_kwarg_str}'.")
 
     def __call__(self, f):
         @functools.wraps(f)
@@ -50,51 +35,51 @@ class BaseDecorator(object):
 
 
 class IsShape(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.is_shape)
 
 
 class NoneMissing(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.none_missing)
 
 
 class Unique(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.unique)
 
 
 class UniqueIndex(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.unique_index)
 
 
 class IsMonotonic(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.is_monotonic)
 
 
 class WithinSet(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.within_set)
 
 
 class WithinRange(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.within_range)
 
 
 class WithinNStd(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.within_n_std)
 
 
 class HasDtypes(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.has_dtypes)
 
 
 class OneToMany(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.one_to_many)
 
 
 class IsSameAs(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.is_same_as)
 
 
 class MultiCheck(BaseDecorator):
-    pass
+    check_func = staticmethod(ck.multi_check)
 
 
 def verify(func, *args, **kwargs):

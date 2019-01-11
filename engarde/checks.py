@@ -101,6 +101,8 @@ def is_shape(df, shape):
     =======
     df : DataFrame
     """
+    print("df: ", df)
+    print("shape: ", shape)
     try:
         check = np.all(np.equal(df.shape, shape) | (np.equal(shape, [-1, -1]) |
                                                     np.equal(shape, [None, None])))
