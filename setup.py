@@ -1,47 +1,53 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""The setup script."""
 from setuptools import setup, find_packages
-# To use a consistent encoding
-from os import path
-import versioneer
+from sphinx.setup_command import BuildDoc
 
-here = path.abspath(path.dirname(__file__))
 
+with open("README.md") as readme_file:
+    readme = readme_file.read()
+
+# Requirements placed here for convenient viewing
+setup_requires = ["pytest-runner"]
+install_requires = ['numpy', 'pandas', 'six']
+tests_requires = ["coverage", "pytest"]
+dev_requires = ["Sphinx", "sphinx_rtd_theme"]
+
+cmdclass = {'build_sphinx': BuildDoc}
+
+name = "simple_email"
+copyright = "2019"
+version = '0.1'
+release = '0.1.0'
 setup(
-    name='engarde',
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
-
+    name=name,
+    version=release,
     description='A python package for defensive data analysis.',
-    long_description='A python package for defensive data analysis.',
-
-    url='https://github.com/tomaugspurger/engarde',
-
-    # Author details
-    author='Tom Augspurger',
-    author_email='tom.w.augspurger@gmail.com',
-
-    # Choose your license
-    license='MIT',
-
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-    ],
-
-    keywords='data analysis',
-    packages=find_packages(exclude=['tests']),
-    install_requires=['numpy', 'pandas', 'six'],
-
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax,
-    # for example:
-    # $ pip install -e .[dev,test]
-    extras_require={
-        'dev': [''],
-        'test': ['coverage', 'pytest', 'ipython', 'traitlets', 'numpydoc'],
-    },
-
+    long_description=readme,
+    url="https://github.com/zaxr/simple_email",
+    author="Zax Rosenberg",
+    author_email="zaxr@protonmail.com",
+    classifiers=["Development Status :: 3 - Alpha",
+                 "Intended Audience :: Developers",
+                 "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+                 "Natural Language :: English",
+                 "Programming Language :: Python :: 3",
+                 "Programming Language :: Python :: 3.6",
+                 "Programming Language :: Python :: 3.7"],
+    keywords='data analysis, testing',
+    packages=find_packages(exclude=["docs", "tests"]),
+    setup_requires=setup_requires,
+    install_requires=install_requires,
+    tests_require=tests_requires,
+    test_suite="tests",
+    extras_require={'dev': dev_requires},
+    cmdclass=cmdclass,
+    # these are optional and override conf.py settings
+    command_options={'build_sphinx': {"project": ("setup.py", name),
+                                      "copyright": ("setup.py", copyright),
+                                      "version": ("setup.py", version),
+                                      "release": ("setup.py", release),
+                                      "source_dir": ("setup.py", "docs")}}
 )

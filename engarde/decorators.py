@@ -34,7 +34,7 @@ class BaseDecorator(object):
             if self.enabled:
                 check_func = self.CLS_FUNC_MAP[self.__class__.__name__]
                 params = inspect.getfullargspec(check_func).args[1:]
-                # Error if parameters fed to decorator that are not accepted by check_func
+                # Warns if parameters fed to decorator that are not accepted by check_func
                 unacceptable_kwargs = [k for k in self.__dict__ if k not in (params + ["enabled"])]
                 if any(unacceptable_kwargs):
                     print(f"The following passed kwargs are not accepted by {check_func.__name__}: "

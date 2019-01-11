@@ -1,20 +1,20 @@
 Engarde
-== == == =
+=======
 
 [![Build Status](https: // travis - ci.org / TomAugspurger / engarde.svg)](https: // travis - ci.org / TomAugspurger / engarde)
 
-A python package for defensive data analysis.
+A python package for defensive data analysis. Inspired by the Engarde library (thanks, Tom Augspurger!).
 Documentation is at [readthedocs](http: // engarde.readthedocs.org / en / latest / ).
 
 Dependencies
-== == == == == ==
+============
 
 - pandas
 
-Supports python 2.7 + and 3.4+
+Supports python 3.5+
 
 Why?
-== ==
+====
 
 Data are messy.
 But, our analysis often depends on certain assumptions about our data
@@ -26,7 +26,7 @@ This is especially important when working with flat files like CSV
 that aren't bound for a more structured destination(e.g. SQL or HDF5).
 
 Examples
-== == == ==
+========
 
 There are two main ways of using the library, which correspond to the
 two main ways I use pandas: writing small scripts or interactively at
@@ -69,11 +69,11 @@ The cleanest way to integrate this is through the[``pipe``](http: // pandas - do
 introduced in pandas 0.16.2 (June 2015).
 
 ```python
->> > import engarde.checks as dc
+>> > import engarde.checks as ck
 >> > (df1.reindex_like(df2)
-...     .pipe(dc.unique_index)
+...     .pipe(ck.unique_index)
 ...     .cumsum()
-...     .pipe(dc.within_range, (0, 100))
+...     .pipe(ck.within_range, (0, 100))
 ...)
 ```
 
@@ -89,7 +89,6 @@ Roadmap
 - Add warn flag to prior funcs(refactor to classes to inherit; polymorphism)
 - Improve error message outputs
 	- Possibly JSON format
-- Add param for debug vs prod mode
 - Add functions for:
   - has_infs,
   - has_neg_infs,

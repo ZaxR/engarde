@@ -1,7 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
 
 # C extensions
 *.so
@@ -40,33 +39,42 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
-.pytest_cache
 nosetests.xml
 coverage.xml
 *,cover
-.noseids
-cover/*
 
 # Translations
 *.mo
 *.pot
 
 # Django stuff:
-*.log
+# *.log
 
 # Sphinx documentation
 docs/_build/
+docs/_source/
 
 # PyBuilder
 target/
 
-# Editor
-.vscode/
-*.swp
+# DotEnv configuration
+.env
 
-# other
-data/
-wheelhouse/
-*.zip
-*.csv
+# Database
+*.db
+*.rdb
 
+# Pycharm
+.idea
+
+# IPython NB Checkpoints
+.ipynb_checkpoints/
+
+# exclude data from source control if you want
+#/data/
+
+#bitbucket key
+secrets
+
+#metadata on Macbooks
+.DS_Store
