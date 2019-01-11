@@ -27,7 +27,7 @@ def test_is_shape():
     for shp in shapes:
         tm.assert_frame_equal(df, ck.is_shape(df, shp))
     for shp in shapes:
-        result = dc.is_shape(shape=shp)(_add_n)(df)
+        result = dc.IsShape(shape=shp)(_add_n)(df)
         tm.assert_frame_equal(result, df + 1)
 
     with pytest.raises(AssertionError):

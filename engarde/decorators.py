@@ -18,18 +18,27 @@ class BaseDecorator(object):
                     "WithinRange": ck.within_range,
                     "WithinNStd": ck.within_n_std,
                     "HasDtypes": ck.has_dtypes,
-                    "OneToMany": one_to_many,
-                    "IsSameAs": is_same_as,
-                    "MultiCheck": multi_check}
+                    "OneToMany": ck.one_to_many,
+                    "IsSameAs": ck.is_same_as,
+                    "MultiCheck": ck.multi_check}
 
-    def __init__(self, enabled=True, **kwargs):
-        self.enabled = enabled  # setter to enforce bool would be a lot safer, but challenge w/ decorator
+    def __init__(self, **kwargs):
+        print("In __init__()")
+        print(kwargs)
+        self.enabled = True  # setter to enforce bool would be a lot safer, but challenge w/ decorator
         # self.warn = False ? No - put at func level for all funcs and pass through
         self.__dict__.update(kwargs)
 
     def __call__(self, f):
+        print("In __call_()")
+        print(f)
+
         @functools.wraps(f)
         def decorated(*args, **kwargs):
+            print("In decorated")
+            print("Args: ", args)
+            print("Kwargs: ", kwargs)
+            print("self.__dict__: ", self.__dict__)
             df = f(*args, **kwargs)
             if self.enabled:
                 check_func = self.CLS_FUNC_MAP[self.__class__.__name__]
@@ -40,6 +49,9 @@ class BaseDecorator(object):
                     print(f"The following passed kwargs are not accepted by {check_func.__name__}: "
                           f"{', '.join(unacceptable_kwargs)}. Ignoring these kwargs and continuing.")
                 kwargs = {param: getattr(self, param) for param in params if hasattr(self, param)}
+                print("Args: ", args)
+                print("Kwargs: ", kwargs)
+                print("self.__dict__: ", self.__dict__)
                 check_func(df, **kwargs)
             return df
         return decorated
@@ -135,10 +147,16 @@ __all__ = ['is_monotonic', 'is_same_as', 'is_shape', 'none_missing',
 
 
 if __name__ == '__main__':
-    df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+    df = pd.DataFrame({"a": [1, np.nan, 3], "b": [4, 5, 6]})
 
     # cheese is a kwarg not accepted by the check function. It's ignored.
     @IsShape(enabled=True, shape=(4, 2), cheese=True)
+    def example1(df):
+        return df.add(5)
+
+    example1(df)  # errors
+
+    @IsShape((4, 2))
     def example1(df):
         return df.add(5)
 
