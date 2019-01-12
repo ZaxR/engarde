@@ -41,9 +41,9 @@ def test_is_shape():
 
     with pytest.raises(AssertionError):
         ck.is_shape(df, (9, 2))
-    with pytest.raises(AssertionError):
+        dc.IsShape((9, 2))(_add_n)(df)
+    with pytest.raises(TypeError):
         dc.IsShape(shape=(9, 2), cheese=True)(_add_n)(df)  # bad dc param check
-        dc.IsShape((9, 2))(_add_n)(df)  # check test
 
 
 def test_none_missing():

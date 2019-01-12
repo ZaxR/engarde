@@ -12,23 +12,14 @@ class BaseDecorator(object):
         self.params = inspect.getfullargspec(self.check_func).args[1:]
 
         self.__dict__.update(dict(zip(self.params, args)))
-        self.__dict__.update(kwargs)
-
-        relev_dict = {k: v for k, v in self.__dict__.items() if k not in ["check_func", "enabled", "params"]}
-        bad_kwargs = [k for k in relev_dict if k not in self.params]
-        if any(bad_kwargs):
-            msg = ("got unexpected keyword arguments:"
-                   if len(bad_kwargs) > 1
-                   else "got an unexpected keyword argument")
-            bad_kwarg_str = ', '.join(bad_kwargs)
-            raise TypeError(f"{self.__class__.__name__} {msg} '{bad_kwarg_str}'.")
+        self.__dict__.update(**kwargs)
 
     def __call__(self, f):
         @functools.wraps(f)
         def decorated(*args, **kwargs):
             df = f(*args, **kwargs)
             if self.enabled:
-                kwargs = {param: getattr(self, param) for param in self.params if hasattr(self, param)}
+                kwargs = {k: v for k, v in self.__dict__.items() if k not in ["check_func", "enabled", "params"]}
                 self.check_func(df, **kwargs)
             return df
         return decorated

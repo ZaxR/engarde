@@ -78,14 +78,27 @@ introduced in pandas 0.16.2 (June 2015).
 ```
 
 See Also
-== == == ==
+========
 
-- [assertr](https: // github.com / tonyfischetti / assertr)
-- [Validada](https: // github.com / jnmclarty / validada)
+- [assertr](https://github.com/tonyfischetti/assertr)
+- [Validada](https://github.com/jnmclarty/validada)
 
 Roadmap
-== == ===
+=======
 
+- Pass tests
+	- Bug: underlying func can't take kwargs, because cause error on bad_kwargs check in __itit__
+	- MultiCheck is broken
+- rewrite readme
+- Rename library
+- push to github
+- Rename funcs
+- add to pypi
+- add readthedocs
+- add travis build server
+- class factory
+- inherit base class and the functions' docstrings w/ __doc__
+- rewrite docs
 - Add warn flag to prior funcs(refactor to classes to inherit; polymorphism)
 - Improve error message outputs
 	- Possibly JSON format
